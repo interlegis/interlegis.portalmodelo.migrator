@@ -1,0 +1,30 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:transmogrifier="http://namespaces.plone.org/transmogrifier"
+    i18n_domain="collective.jsonmigrator">
+
+  <include package="collective.transmogrifier" file="meta.zcml" />
+  <include package="collective.transmogrifier" />
+  <include package="plone.app.transmogrifier" />
+  <include package="Products.CMFCore" file="permissions.zcml" />
+
+  <browser:page
+      name="migrate"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      permission="cmf.ManagePortal"
+      class=".forms.PortalModeloMigratorView"
+      />
+
+  <transmogrifier:registerConfig
+      name="interlegis.portalmodelo.migrator"
+      title="Migration configuration from Portal Modelo 2 to 3 (Plone 2.5 to Plone 4.3) content types"
+      configuration="portal_modelo_2.cfg"
+      />
+
+  <utility
+      component=".pm2_custom_blueprint.PM2CustomBlueprint"
+      name="pm2_custom"
+      />
+
+</configure>
