@@ -16,6 +16,13 @@
       class=".forms.PortalModeloMigratorView"
       />
 
+  <browser:page
+      name="migrate_result"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      permission="cmf.ManagePortal"
+      class=".forms.PortalModeloMigratorResultView"
+      />
+
   <transmogrifier:registerConfig
       name="interlegis.portalmodelo.migrator"
       title="Migration configuration from Portal Modelo 2 to 3 (Plone 2.5 to Plone 4.3) content types"

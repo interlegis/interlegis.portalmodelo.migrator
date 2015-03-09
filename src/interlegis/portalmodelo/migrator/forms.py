@@ -1,9 +1,13 @@
+import logging
+from StringIO import StringIO
+
+from Products.Five.browser import BrowserView
 from collective.jsonmigrator import msgFact as _, logger
 from collective.transmogrifier.transmogrifier import Transmogrifier
 from plone.z3cform.layout import wrap_form
 from z3c.form import button, field, form
 from zope.interface import Interface
-from zope.schema import ASCIILine, TextLine, URI
+from zope.schema import ASCIILine, TextLine, URI, Password
 
 
 class IPortalModeloMigrator(Interface):
@@ -20,7 +24,7 @@ class IPortalModeloMigrator(Interface):
         required=True,
     )
 
-    remote_password = TextLine(
+    remote_password = Password(
         title=_(u"Password"),
         description=_(u"Password to log in to the remote site"),
         required=True,
@@ -45,9 +49,40 @@ class PortalModeloMigrator(form.Form):
         if errors:
             return False
         overrides = {'remotesource': {k.replace('_', '-'): v for k, v in data.iteritems()}}
+
+        log_output = StringIO()
+        logHandler = logging.StreamHandler(log_output)
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        logHandler.setFormatter(formatter)
+        logger.addHandler(logHandler)
+
         logger.info("Start of importing")
         Transmogrifier(self.context)('interlegis.portalmodelo.migrator', **overrides)
         logger.info("End of importing")
 
+        logHandler.flush()
+        log_output.flush()
+        session = self.request.SESSION
+        session['log'] = log_output.getvalue()
+
+        self.request.RESPONSE.redirect('/'.join((self.context.absolute_url(), '@@migrate_result')))
+
 
 PortalModeloMigratorView = wrap_form(PortalModeloMigrator)
+
+
+class PortalModeloMigratorResultView(BrowserView):
+
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    def __call__(self):
+        session = self.request.SESSION
+        log = session['log']
+        msgs = [l for l in log.split('\n') if ' - INFO - :: Skipping -> ' not in l]
+
+        actually_skipped = [a.split(' -> ')[-1] for a in msgs if 'ACTUALLY SKIPPED -> ' in a]
+        filtered_msgs = [l for l in msgs if all(a not in l for a in actually_skipped)]
+
+        return '\n'.join(filtered_msgs)

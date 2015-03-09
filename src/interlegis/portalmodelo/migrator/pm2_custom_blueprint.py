@@ -25,9 +25,9 @@ class PM2CustomBlueprint(object):
             if posixpath.basename(path.strip('/')) in {'syndication_information',
                                                        'crit__created_ATSortCriterion',
                                                        'crit__Type_ATPortalTypeCriterion'}:
-                logger.info(':: SKIPPED -> ' + path)
+                logger.info(':: ACTUALLY SKIPPED -> ' + path)
                 continue
-            item['_path'] = path.replace('cm_flo/portal', 'novo')
+            item['_path'] = path.replace('cm_flo/portal', '')
 
             original_type = item['_type']
             item['_type'] = type_substitution.get(original_type, original_type)
@@ -36,16 +36,3 @@ class PM2CustomBlueprint(object):
             types[original_type].append(path)
 
             yield item
-
-        print '##################################################################################'
-        print '##################################################################################'
-        print '##################################################################################'
-        for k, l in types.iteritems():
-            print 'VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV'
-            print k
-            print '----------------------------------------------------------------------------------'
-            print l
-        print '##################################################################################'
-        print '##################################################################################'
-        print '##################################################################################'
-        print types.keys()
