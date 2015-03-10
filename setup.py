@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '1.0b4.dev0'
+version = '0.1'
 description = 'Portal Modelo: Integração com sistemas do processo legislativo.'
 long_description = (
     open('README.rst').read() + '\n' +
