@@ -24,10 +24,13 @@ class PM2CustomBlueprint(object):
             # skip
             if posixpath.basename(path.strip('/')) in {'syndication_information',
                                                        'crit__created_ATSortCriterion',
-                                                       'crit__Type_ATPortalTypeCriterion'}:
+                                                       'crit__Type_ATPortalTypeCriterion',
+                                                       'lista-eventos',
+                                                       'lista-noticias',
+                                                       }:
                 logger.info(':: ACTUALLY SKIPPED -> ' + path)
                 continue
-            item['_path'] = path.replace('cm_flo/portal', '')
+            item['_path'] = path.replace('cm_flo/portal', 'institucional')
 
             original_type = item['_type']
             item['_type'] = type_substitution.get(original_type, original_type)
