@@ -1,9 +1,10 @@
-from collections import defaultdict
 import posixpath
 
-from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
-from zope.interface import classProvides, implements
+from Products.CMFCore.utils import getToolByName
 from collective.jsonmigrator import logger
+from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
+from collective.transmogrifier.transmogrifier import Transmogrifier
+from zope.interface import classProvides, implements
 
 
 class PM2CustomBlueprint(object):
@@ -15,7 +16,6 @@ class PM2CustomBlueprint(object):
         self.previous = previous
 
     def __iter__(self):
-        types = defaultdict(list)
         type_substitution = {
             'Large Plone Folder': 'Folder',
         }
@@ -32,10 +32,22 @@ class PM2CustomBlueprint(object):
                 continue
             item['_path'] = path.replace('cm_flo/portal', 'institucional')
 
+            # Adjust types
             original_type = item['_type']
             item['_type'] = type_substitution.get(original_type, original_type)
 
-            # DEV
-            types[original_type].append(path)
-
             yield item
+
+
+def run_migration(context, overrides):
+    logger.info("Start of importing")
+
+    Transmogrifier(context)('interlegis.portalmodelo.migrator', **overrides)
+
+    wf_tool = getToolByName(context, 'portal_workflow')
+    wf_tool.updateRoleMappings()
+
+    catalog = getToolByName(context, 'portal_catalog')
+    catalog.clearFindAndRebuild()
+
+    logger.info("End of importing")

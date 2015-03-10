@@ -30,7 +30,7 @@
       />
 
   <utility
-      component=".pm2_custom_blueprint.PM2CustomBlueprint"
+      component=".pm2_migration.PM2CustomBlueprint"
       name="pm2_custom"
       />
 

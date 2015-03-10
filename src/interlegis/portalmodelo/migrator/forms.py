@@ -3,11 +3,12 @@ from StringIO import StringIO
 
 from Products.Five.browser import BrowserView
 from collective.jsonmigrator import msgFact as _, logger
-from collective.transmogrifier.transmogrifier import Transmogrifier
 from plone.z3cform.layout import wrap_form
 from z3c.form import button, field, form
 from zope.interface import Interface
 from zope.schema import ASCIILine, TextLine, URI, Password
+
+from pm2_migration import run_migration
 
 
 class IPortalModeloMigrator(Interface):
@@ -56,9 +57,7 @@ class PortalModeloMigrator(form.Form):
         logHandler.setFormatter(formatter)
         logger.addHandler(logHandler)
 
-        logger.info("Start of importing")
-        Transmogrifier(self.context)('interlegis.portalmodelo.migrator', **overrides)
-        logger.info("End of importing")
+        run_migration(self.context, overrides)
 
         logHandler.flush()
         log_output.flush()
