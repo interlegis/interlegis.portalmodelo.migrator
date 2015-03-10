@@ -36,6 +36,13 @@ class PM2CustomBlueprint(object):
             original_type = item['_type']
             item['_type'] = type_substitution.get(original_type, original_type)
 
+            # Change all workflows to 'simple_publication_workflow'
+            if '_workflow_history' in item:
+                values = item['_workflow_history'].values()
+                # There should be exactly one key, value pair. We discard the key
+                assert len(values) == 1
+                item['_workflow_history'] = {'simple_publication_workflow': values[0]}
+
             yield item
 
 
