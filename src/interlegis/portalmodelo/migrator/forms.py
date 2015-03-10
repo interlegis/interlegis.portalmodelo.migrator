@@ -20,21 +20,28 @@ class IPortalModeloMigrator(Interface):
     )
 
     remote_username = ASCIILine(
-        title=_(u"Username"),
+        title=_(u"Remote Username"),
         description=_(u"Username to log in to the remote site"),
         required=True,
     )
 
     remote_password = Password(
-        title=_(u"Password"),
+        title=_(u"Remote Password"),
         description=_(u"Password to log in to the remote site"),
         required=True,
     )
 
     remote_path = TextLine(
-        title=_(u"Start path"),
+        title=_(u"Remote path"),
         description=_(u"Path where to start crawling and importing"),
         required=True,
+    )
+
+    destiny_path = TextLine(
+        title=_(u"Destiny path HERE"),
+        description=_(u"Path (on this site) where the migrated content will be put"),
+        required=True,
+        default=u'/institucional'
     )
 
 
@@ -49,7 +56,13 @@ class PortalModeloMigrator(form.Form):
         data, errors = self.extractData()
         if errors:
             return False
-        overrides = {'remotesource': {k.replace('_', '-'): v for k, v in data.iteritems()}}
+        overrides = {
+            'remotesource': {k.replace('_', '-'): v for k, v in data.iteritems()},
+            'pm2_custom': {
+                'remote-path': data['remote_path'],
+                'destiny-path': data['destiny_path'],
+            }
+        }
 
         log_output = StringIO()
         logHandler = logging.StreamHandler(log_output)

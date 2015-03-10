@@ -14,6 +14,8 @@ class PM2CustomBlueprint(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
+        self.remote_path = options['remote-path'].strip('/')
+        self.destiny_path = options['destiny-path'].strip('/')
 
     def __iter__(self):
         type_substitution = {
@@ -30,7 +32,10 @@ class PM2CustomBlueprint(object):
                                                        }:
                 logger.info(':: ACTUALLY SKIPPED -> ' + path)
                 continue
-            item['_path'] = path.replace('cm_flo/portal', 'institucional')
+
+            # Rewrite path
+            assert path.startswith(self.remote_path)
+            item['_path'] = self.destiny_path + path[len(self.remote_path):]
 
             # Adjust types
             original_type = item['_type']
