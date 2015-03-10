@@ -14,8 +14,8 @@ class PM2CustomBlueprint(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.remote_path = options['remote-path'].strip('/')
-        self.destiny_path = options['destiny-path'].strip('/')
+        self.remote_path = str(options['remote-path'].strip('/'))
+        self.destiny_path = str(options['destiny-path'].strip('/'))
 
     def __iter__(self):
         type_substitution = {
