@@ -1,9 +1,9 @@
 import posixpath
-
 from Products.CMFCore.utils import getToolByName
 from collective.jsonmigrator import logger
 from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
 from collective.transmogrifier.transmogrifier import Transmogrifier
+from zope.component.hooks import getSite
 from zope.interface import classProvides, implements
 
 
@@ -25,6 +25,16 @@ class PM2CustomBlueprint(object):
     def __iter__(self):
         for item in self.previous:
             path = item['_path']
+
+            # portal_windowZ (assumes windowZ is installed here)
+            portal_windowz = getSite().portal_windowz
+            if 'portal_windowZ' in path:
+                portal_windowz.setBase_url(unicode(item['base_url']))
+                portal_windowz.setPage_width(unicode(item['page_width']))
+                portal_windowz.setPage_height(unicode(item['page_height']))
+                portal_windowz.setHttp_proxy(unicode(item['http_proxy']))
+                portal_windowz.setDynamic_window(item['dynamic_window'])
+                continue
 
             # skip
             if posixpath.basename(path.strip('/')) in {'syndication_information',
