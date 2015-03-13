@@ -7,6 +7,11 @@ from collective.transmogrifier.transmogrifier import Transmogrifier
 from zope.interface import classProvides, implements
 
 
+TYPE_SUBSTITUTION = {
+    'Large Plone Folder': 'Folder',
+}
+
+
 class PM2CustomBlueprint(object):
 
     classProvides(ISectionBlueprint)
@@ -18,11 +23,9 @@ class PM2CustomBlueprint(object):
         self.destiny_path = str(options['destiny-path'].strip('/'))
 
     def __iter__(self):
-        type_substitution = {
-            'Large Plone Folder': 'Folder',
-        }
         for item in self.previous:
             path = item['_path']
+
             # skip
             if posixpath.basename(path.strip('/')) in {'syndication_information',
                                                        'crit__created_ATSortCriterion',
@@ -39,7 +42,7 @@ class PM2CustomBlueprint(object):
 
             # Adjust types
             original_type = item['_type']
-            item['_type'] = type_substitution.get(original_type, original_type)
+            item['_type'] = TYPE_SUBSTITUTION.get(original_type, original_type)
 
             # Change all workflows to 'simple_publication_workflow'
             if '_workflow_history' in item:
