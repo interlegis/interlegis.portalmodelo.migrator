@@ -52,6 +52,11 @@ class PM2CustomBlueprint(object):
                     assert len(values) == 1
                     item['_workflow_history'] = {'simple_publication_workflow': values[0]}
 
+            # rename content with id == 'index_html' to just 'index'
+            container, id = posixpath.split(item['_path'].strip('/'))
+            if id == 'index_html':
+                item['_path'] = '/'.join((container, 'index'))
+
             yield item
 
 
