@@ -34,4 +34,9 @@
       name="pm2_custom"
       />
 
+  <utility
+      component=".pm2_migration.PM2FixBlobContentTypeBlueprint"
+      name="pm2_fix_blob_content_type"
+      />
+
 </configure>

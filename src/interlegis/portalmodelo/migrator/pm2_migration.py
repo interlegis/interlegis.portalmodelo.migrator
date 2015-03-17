@@ -3,6 +3,7 @@ from Products.CMFCore.utils import getToolByName
 from collective.jsonmigrator import logger
 from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
 from collective.transmogrifier.transmogrifier import Transmogrifier
+from plone.app.blob.interfaces import IATBlob
 from zope.component.hooks import getSite
 from zope.interface import classProvides, implements
 
@@ -68,6 +69,43 @@ class PM2CustomBlueprint(object):
                 item['_path'] = '/'.join((container, 'index'))
 
             yield item
+
+
+class PM2FixBlobContentTypeBlueprint(object):
+    '''It seems that Blob File method .setContentType is bugged
+    So we forcefully set the content type.
+    '''
+
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.context = transmogrifier.context
+
+    def __iter__(self):
+        for item in self.previous:
+            if '_datafield_file' in item and 'content_type' in item['_datafield_file']:
+                obj = self.context.unrestrictedTraverse(item['_path'].lstrip('/'), None)
+                if IATBlob.providedBy(obj):
+                    self.setBlobContentType_hack(obj, item['_datafield_file']['content_type'])
+            yield item
+
+    def setBlobContentType_hack(self, blob_file, value):
+        '''Hack to directcly set content type of a blob file.
+
+        Based on
+
+        Products.Archetypes-1.9.7-py2.7.egg/Products/Archetypes/BaseObject.py
+            BaseObject.setContentType
+
+        plone.app.blob-1.5.9-py2.7.egg/plone/app/blob/field.py
+            BlobField.getContentType (note that there is no setContentType in this class)
+        '''
+        field = blob_file.getPrimaryField()
+        if field:
+            blob = field.getUnwrapped(blob_file)
+            blob.setContentType(value)
 
 
 def run_migration(context, overrides):
