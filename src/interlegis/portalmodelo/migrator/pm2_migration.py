@@ -28,8 +28,8 @@ class PM2CustomBlueprint(object):
             path = item['_path']
 
             # portal_windowZ (assumes windowZ is installed here)
-            portal_windowz = getSite().portal_windowz
             if 'portal_windowZ' in path:
+                portal_windowz = getSite().portal_windowz
                 portal_windowz.setBase_url(unicode(item['base_url']))
                 portal_windowz.setPage_width(unicode(item['page_width']))
                 portal_windowz.setPage_height(unicode(item['page_height']))
