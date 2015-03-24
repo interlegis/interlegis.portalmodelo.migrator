@@ -27,7 +27,7 @@ class PM2CustomBlueprint(object):
         for item in self.previous:
             path = item['_path']
 
-            # portal_windowZ (assumes windowZ is installed here)
+            # PORTAL_WINDOWZ (ASSUMES WINDOWZ IS INSTALLED HERE)
             if 'portal_windowZ' in path:
                 portal_windowz = getSite().portal_windowz
                 portal_windowz.setBase_url(unicode(item['base_url']))
@@ -37,7 +37,7 @@ class PM2CustomBlueprint(object):
                 portal_windowz.setDynamic_window(item['dynamic_window'])
                 continue
 
-            # skip
+            # SKIP
             if posixpath.basename(path.strip('/')) in {'syndication_information',
                                                        'crit__created_ATSortCriterion',
                                                        'crit__Type_ATPortalTypeCriterion',
@@ -47,15 +47,15 @@ class PM2CustomBlueprint(object):
                 logger.info(':: ACTUALLY SKIPPED -> ' + path)
                 continue
 
-            # Rewrite path
+            # REWRITE PATH
             assert path.startswith(self.remote_path)
             item['_path'] = self.destiny_path + path[len(self.remote_path):]
 
-            # Adjust types
+            # ADJUST TYPES
             original_type = item['_type']
             item['_type'] = TYPE_SUBSTITUTION.get(original_type, original_type)
 
-            # Change all workflows to 'simple_publication_workflow'
+            # CHANGE ALL WORKFLOWS TO 'simple_publication_workflow'
             if '_workflow_history' in item:
                 values = item['_workflow_history'].values()
                 if values:
@@ -63,7 +63,7 @@ class PM2CustomBlueprint(object):
                     assert len(values) == 1
                     item['_workflow_history'] = {'simple_publication_workflow': values[0]}
 
-            # rename content with id == 'index_html' to just 'index'
+            # RENAME CONTENT WITH id == 'index_html' TO JUST 'index'
             container, id = posixpath.split(item['_path'].strip('/'))
             if id == 'index_html':
                 item['_path'] = '/'.join((container, 'index'))
