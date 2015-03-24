@@ -1,11 +1,17 @@
+import base64
 import posixpath
+from StringIO import StringIO
+from os.path import splitext
+
+import PIL.Image
 from Products.CMFCore.utils import getToolByName
-from collective.jsonmigrator import logger
 from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
 from collective.transmogrifier.transmogrifier import Transmogrifier
 from plone.app.blob.interfaces import IATBlob
 from zope.component.hooks import getSite
 from zope.interface import classProvides, implements
+
+from collective.jsonmigrator import logger
 
 
 TYPE_SUBSTITUTION = {
@@ -26,6 +32,10 @@ class PM2CustomBlueprint(object):
     def __iter__(self):
         for item in self.previous:
             path = item['_path']
+
+            # CONVERT 'image/x-ms-bmp' TO PNG
+            if '_datafield_image' in item and item['_datafield_image']['content_type'] == 'image/x-ms-bmp':
+                convert_bmp_to_png(item)
 
             # PORTAL_WINDOWZ (ASSUMES WINDOWZ IS INSTALLED HERE)
             if 'portal_windowZ' in path:
@@ -75,6 +85,33 @@ class PM2CustomBlueprint(object):
                 del item['_defaultpage']
 
             yield item
+
+
+def convert_bmp_to_png(item):
+    image_data = item['_datafield_image']
+    filename, data, content_type, encoding = [image_data[k] for k in ['filename', 'data', 'content_type', 'encoding']]
+    original_decoded = base64.b64decode(data)
+    input = StringIO(original_decoded)
+    image = PIL.Image.open(input)
+    output = StringIO()
+    image.save(output, 'PNG')
+    png_decoded = output.getvalue()
+    png_data = base64.b64encode(png_decoded)
+
+    basename, ext = splitext(filename)
+    if ext.lower() == '.bmp':
+        png_filename = basename + '.png'
+    else:
+        png_filename = filename
+
+    item['_datafield_image'] = {
+        'size': len(png_decoded),
+        'filename': png_filename,
+        'data': png_data,
+        'content_type': 'image/png',
+        'encoding': 'base64'
+    }
+    logger.info("@@@@ Image Converted from [%s] to [%s] in [%s]" % (filename, png_filename, item['_path']))
 
 
 class PM2FixBlobContentTypeBlueprint(object):
