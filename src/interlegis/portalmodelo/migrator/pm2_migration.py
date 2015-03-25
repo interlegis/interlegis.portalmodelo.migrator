@@ -152,14 +152,22 @@ class PM2FixBlobContentTypeBlueprint(object):
 
 
 def run_migration(context, overrides):
-    logger.info("Start of importing")
-
+    logger.info(">>>>>>>> Start of importing")
     Transmogrifier(context)('interlegis.portalmodelo.migrator', **overrides)
+    logger.info(">>>>>>>> End of importing")
 
-    wf_tool = getToolByName(context, 'portal_workflow')
-    wf_tool.updateRoleMappings()
+    try:
+        wf_tool = getToolByName(context, 'portal_workflow')
+        wf_tool.updateRoleMappings()
+    except Exception, e:
+        logger.error('An error occurred while updating the workflow mappings:\n' + e.message)
+    else:
+        logger.info(">>>>>>>> Worflow mappings updated")
 
-    catalog = getToolByName(context, 'portal_catalog')
-    catalog.clearFindAndRebuild()
-
-    logger.info("End of importing")
+    try:
+        catalog = getToolByName(context, 'portal_catalog')
+        catalog.clearFindAndRebuild()
+    except Exception, e:
+        logger.error('An error occurred while updating the catalog:\n' + e.message)
+    else:
+        logger.info(">>>>>>>> Catalog updated")

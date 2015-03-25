@@ -1,13 +1,14 @@
 import logging
 from StringIO import StringIO
+from collections import defaultdict
 
 from Products.Five.browser import BrowserView
-from collective.jsonmigrator import msgFact as _, logger
 from plone.z3cform.layout import wrap_form
 from z3c.form import button, field, form
 from zope.interface import Interface
 from zope.schema import ASCIILine, TextLine, URI, Password
 
+from collective.jsonmigrator import msgFact as _, logger
 from pm2_migration import run_migration
 
 
@@ -64,18 +65,23 @@ class PortalModeloMigrator(form.Form):
             }
         }
 
-        log_output = StringIO()
-        logHandler = logging.StreamHandler(log_output)
         formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        logHandler.setFormatter(formatter)
-        logger.addHandler(logHandler)
+
+        log_handler = logging.StreamHandler(StringIO())
+        log_handler.setFormatter(formatter)
+        logger.addHandler(log_handler)
+
+        classify_by_level_handler = ClassifyByLevelHandler()
+        classify_by_level_handler.setFormatter(formatter)
+        logger.addHandler(classify_by_level_handler)
 
         run_migration(self.context, overrides)
 
-        logHandler.flush()
-        log_output.flush()
+        log_handler.flush()
+
         session = self.request.SESSION
-        session['log'] = log_output.getvalue()
+        session['log_message_output'] = log_handler.stream.getvalue()
+        session['all_but_info'] = classify_by_level_handler.all_but_info()
 
         self.request.RESPONSE.redirect('/'.join((self.context.absolute_url(), '@@migrate_result')))
 
@@ -91,10 +97,35 @@ class PortalModeloMigratorResultView(BrowserView):
 
     def __call__(self):
         session = self.request.SESSION
-        log = session['log']
-        msgs = [l for l in log.split('\n') if ' - INFO - :: Skipping -> ' not in l]
+        msgs = [l for l in session['log_message_output'].split('\n')
+            if ' - INFO - :: Skipping -> ' not in l]
 
         actually_skipped = [a.split(' -> ')[-1] for a in msgs if 'ACTUALLY SKIPPED -> ' in a]
         filtered_msgs = [l for l in msgs if all(a not in l for a in actually_skipped)]
 
-        return '\n'.join(filtered_msgs)
+        all_but_info_mgs = session['all_but_info']
+
+        return '''
+##################################### ERRORS + WARNINGS ###########################################
+%s
+
+
+######################################## ALL MESSAGES #############################################
+%s
+''' % ('\n'.join(all_but_info_mgs), '\n'.join(filtered_msgs))
+
+
+class ClassifyByLevelHandler(logging.Handler):
+
+    def __init__(self):
+        super(ClassifyByLevelHandler, self).__init__()
+        self.messages = defaultdict(list)
+
+    def emit(self, record):
+        self.messages[record.levelname].append(self.format(record))
+
+    def all_but_info(self):
+        return [msg
+            for key in self.messages.keys()
+            for msg in self.messages[key]
+            if key != 'INFO']
