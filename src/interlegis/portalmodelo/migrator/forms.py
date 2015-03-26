@@ -97,6 +97,10 @@ class PortalModeloMigratorResultView(BrowserView):
 
     def __call__(self):
         session = self.request.SESSION
+        if not session.has_key('log_message_output'):  # noqa
+            return '''
+------------------------------------------ NO DATA ------------------------------------------------
+'''
         msgs = [l for l in session['log_message_output'].split('\n')
             if ' - INFO - :: Skipping -> ' not in l]
 
