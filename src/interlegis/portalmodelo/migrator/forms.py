@@ -102,7 +102,7 @@ class PortalModeloMigratorResultView(BrowserView):
 ------------------------------------------ NO DATA ------------------------------------------------
 '''
         msgs = [l for l in session['log_message_output'].split('\n')
-            if ' - INFO - :: Skipping -> ' not in l]
+                if ' - INFO - :: Skipping -> ' not in l]
 
         actually_skipped = [a.split(' -> ')[-1] for a in msgs if 'ACTUALLY SKIPPED -> ' in a]
         filtered_msgs = [l for l in msgs if all(a not in l for a in actually_skipped)]
@@ -129,7 +129,6 @@ class ClassifyByLevelHandler(logging.Handler):
         self.messages[record.levelname].append(self.format(record))
 
     def all_but_info(self):
-        return [msg
-            for key in self.messages.keys()
-            for msg in self.messages[key]
-            if key != 'INFO']
+        return [msg for key in self.messages.keys()
+                for msg in self.messages[key]
+                if key != 'INFO']

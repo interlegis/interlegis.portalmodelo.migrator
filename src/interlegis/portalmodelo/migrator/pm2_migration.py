@@ -84,7 +84,8 @@ class PM2CustomBlueprint(object):
 
             # AVOID HAVING 'index_html' SET AS THE DEFAULT PAGE OF AN IMAGE
             #   ATBlob.index_html is a method in Image)
-            #   Without this we would hit a bug here: plone.app.transmogrifier-1.3-py2.7.egg/plone/app/transmogrifier/browserdefault.py:50
+            # Without this we would hit a bug here:
+            # plone.app.transmogrifier-1.3-py2.7.egg/plone/app/transmogrifier/browserdefault.py:50
             if item['_type'] in ['Image', 'File'] and item['_defaultpage'] == 'index_html':
                 del item['_defaultpage']
 
@@ -119,6 +120,7 @@ def convert_bmp_to_png(item):
 
 
 class PM2FixBlobContentTypeBlueprint(object):
+
     '''It seems that Blob File method .setContentType is bugged
     So we forcefully set the content type.
     '''
