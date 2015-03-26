@@ -16,6 +16,8 @@ from collective.jsonmigrator import logger
 
 TYPE_SUBSTITUTION = {
     'Large Plone Folder': 'Folder',
+    'ATAudio': 'File',
+    'ATVideo': 'File',
 }
 
 
@@ -63,7 +65,9 @@ class PM2CustomBlueprint(object):
 
             # ADJUST TYPES
             original_type = item['_type']
-            item['_type'] = TYPE_SUBSTITUTION.get(original_type, original_type)
+            if original_type in TYPE_SUBSTITUTION:
+                item['_type'] = TYPE_SUBSTITUTION[original_type]
+                logger.warn(':: TYPE TYPE_SUBSTITUTED (%s -> %s) in %s' % (original_type, item['_type'], path))
 
             # CHANGE ALL WORKFLOWS TO 'simple_publication_workflow'
             if '_workflow_history' in item:
