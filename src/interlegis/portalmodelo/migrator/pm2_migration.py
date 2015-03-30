@@ -35,6 +35,10 @@ class PM2CustomBlueprint(object):
         for item in self.previous:
             path = item['_path']
 
+            # Remove strange layout from old ATAudio/ATVideo types:
+            if item['_type'] in ['ATAudio', 'ATVideo'] and '_layout' in item:
+                del item['_layout']
+
             # CONVERT 'image/x-ms-bmp' TO PNG
             if '_datafield_image' in item and item['_datafield_image']['content_type'] == 'image/x-ms-bmp':
                 convert_bmp_to_png(item)
