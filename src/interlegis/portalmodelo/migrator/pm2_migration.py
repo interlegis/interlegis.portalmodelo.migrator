@@ -96,6 +96,22 @@ class PM2CustomBlueprint(object):
             if item['_type'] in ['Image', 'File'] and item['_defaultpage'] == 'index_html':
                 del item['_defaultpage']
 
+            # FLOWPLAYER LAYOUT
+            if item['_type'] == 'File' \
+                and '_datafield_file' in item \
+                and item['_datafield_file']['content_type'] in [
+                    'audio/mpeg',
+                    'audio/x-mp3',
+                    'audio/x-mpeg',
+                    'audio/mp3',
+                    'video/mp4',
+                    'video/x-flv',
+                    'application/x-flash-video',
+                    'flv-application/octet-stream',
+                    'video/flv',
+            ]:
+                item['_layout'] = 'flowplayer'
+
             yield item
 
 
