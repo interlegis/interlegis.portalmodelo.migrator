@@ -35,9 +35,12 @@ class PM2CustomBlueprint(object):
         for item in self.previous:
             path = item['_path']
 
-            # Remove strange layout from old ATAudio/ATVideo types:
-            if item['_type'] in ['ATAudio', 'ATVideo'] and '_layout' in item:
-                del item['_layout']
+            # Remove strange layout from old ATAudio/ATVideo types (and other bad or usued fields)
+            #  Note that these types will be substituted by "File" afterwards (see TYPE_SUBSTITUTION use)
+            if item['_type'] in ['ATAudio', 'ATVideo']:
+                remove_fields(item, [
+                    '_layout',
+                    'album', 'artist', 'audioTitle', 'cacheStatus', 'comment', 'year'])
 
             # CONVERT 'image/x-ms-bmp' TO PNG
             if '_datafield_image' in item and item['_datafield_image']['content_type'] == 'image/x-ms-bmp':
@@ -94,6 +97,12 @@ class PM2CustomBlueprint(object):
                 del item['_defaultpage']
 
             yield item
+
+
+def remove_fields(item, fields):
+    for field in fields:
+        if field in item:
+            del item[field]
 
 
 def convert_bmp_to_png(item):
