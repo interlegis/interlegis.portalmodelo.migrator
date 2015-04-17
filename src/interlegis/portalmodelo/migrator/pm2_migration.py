@@ -21,7 +21,7 @@ TYPE_SUBSTITUTION = {
 }
 
 
-class PM2CustomBlueprint(object):
+class MigraPMCustomBlueprint(object):
 
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -148,10 +148,10 @@ def convert_bmp_to_png(item):
     logger.info("@@@@ Image Converted from [%s] to [%s] in [%s]" % (filename, png_filename, item['_path']))
 
 
-class PM2FixBlobContentTypeBlueprint(object):
+class MigraPMFixBlobContentTypeBlueprint(object):
 
-    '''It seems that Blob File method .setContentType is bugged
-    So we forcefully set the content type.
+    '''It seems that Blob File method .setContentType is bugged,
+        so we forcefully set the content type.
     '''
 
     classProvides(ISectionBlueprint)
