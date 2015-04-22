@@ -93,7 +93,7 @@ class MigraPMCustomBlueprint(object):
             #   ATBlob.index_html is a method in Image)
             # Without this we would hit a bug here:
             # plone.app.transmogrifier-1.3-py2.7.egg/plone/app/transmogrifier/browserdefault.py:50
-            if item['_type'] in ['Image', 'File'] and item['_defaultpage'] == 'index_html':
+            if item['_type'] in ['Image', 'File'] and item.get('_defaultpage', None) == 'index_html':
                 del item['_defaultpage']
 
             # FLOWPLAYER LAYOUT
