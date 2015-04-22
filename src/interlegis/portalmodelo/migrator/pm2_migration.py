@@ -5,13 +5,14 @@ from os.path import splitext
 
 import PIL.Image
 from Products.CMFCore.utils import getToolByName
+from collective.jsonmigrator import logger
 from collective.transmogrifier.interfaces import ISection, ISectionBlueprint
 from collective.transmogrifier.transmogrifier import Transmogrifier
 from plone.app.blob.interfaces import IATBlob
 from zope.component.hooks import getSite
 from zope.interface import classProvides, implements
 
-from collective.jsonmigrator import logger
+from resilient_blueprints import wrap_and_reregister_blueprints
 
 
 TYPE_SUBSTITUTION = {
@@ -186,10 +187,37 @@ class MigraPMFixBlobContentTypeBlueprint(object):
             blob.setContentType(value)
 
 
-def run_migration(context, overrides):
+BLUEPRINT_IDS_TO_WRAP = [
+    'collective.jsonmigrator.remotesource',
+    'collective.transmogrifier.sections.manipulator',
+    'collective.transmogrifier.sections.constructor',
+    'plone.app.transmogrifier.atschemaupdater',
+    'plone.app.transmogrifier.uidupdater',
+    'plone.app.transmogrifier.browserdefault',
+    'collective.jsonmigrator.datafields',
+    'collective.jsonmigrator.workflowhistory',
+    'collective.jsonmigrator.properties',
+    'collective.jsonmigrator.owner',
+    'collective.jsonmigrator.local_roles',
+    'collective.jsonmigrator.mimetype',
+    'collective.jsonmigrator.skipitems',
+    'pm2_custom',
+    'pm2_fix_blob_content_type',
+]
+
+
+def run_migration(context, overrides, session):
+
+    # Migrate
+
     logger.info(">>>>>>>> Start of importing")
+
+    tracebacks = wrap_and_reregister_blueprints(BLUEPRINT_IDS_TO_WRAP, session)
     Transmogrifier(context)('interlegis.portalmodelo.migrator', **overrides)
+
     logger.info(">>>>>>>> End of importing")
+
+    # Adjust things afterwards
 
     try:
         wf_tool = getToolByName(context, 'portal_workflow')
@@ -198,7 +226,6 @@ def run_migration(context, overrides):
         logger.error('An error occurred while updating the workflow mappings:\n' + e.message)
     else:
         logger.info(">>>>>>>> Worflow mappings updated")
-
     try:
         catalog = getToolByName(context, 'portal_catalog')
         catalog.clearFindAndRebuild()
@@ -206,3 +233,5 @@ def run_migration(context, overrides):
         logger.error('An error occurred while updating the catalog:\n' + e.message)
     else:
         logger.info(">>>>>>>> Catalog updated")
+
+    return tracebacks

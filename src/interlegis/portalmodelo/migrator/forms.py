@@ -75,13 +75,14 @@ class PortalModeloMigrator(form.Form):
         classify_by_level_handler.setFormatter(formatter)
         logger.addHandler(classify_by_level_handler)
 
-        run_migration(self.context, overrides)
+        session = self.request.SESSION
+        tracebacks = run_migration(self.context, overrides, session)
 
         log_handler.flush()
 
-        session = self.request.SESSION
         session['log_message_output'] = log_handler.stream.getvalue()
         session['all_but_info'] = classify_by_level_handler.all_but_info()
+        session['traceback_output'] = get_traceback_output(tracebacks)
 
         self.request.RESPONSE.redirect('/'.join((self.context.absolute_url(), '@@migrate_result')))
 
@@ -108,6 +109,7 @@ class PortalModeloMigratorResultView(BrowserView):
         filtered_msgs = [l for l in msgs if all(a not in l for a in actually_skipped)]
 
         all_but_info_mgs = session['all_but_info']
+        traceback_output = session['traceback_output']
 
         return '''
 ##################################### ERRORS + WARNINGS ###########################################
@@ -116,7 +118,11 @@ class PortalModeloMigratorResultView(BrowserView):
 
 ######################################## ALL MESSAGES #############################################
 %s
-''' % ('\n'.join(all_but_info_mgs), '\n'.join(filtered_msgs))
+######################################## TRACEBACKS ###############################################
+%s
+''' % ('\n'.join(all_but_info_mgs),
+       '\n'.join(filtered_msgs),
+       '\n'.join(traceback_output))
 
 
 class ClassifyByLevelHandler(logging.Handler):
@@ -132,3 +138,16 @@ class ClassifyByLevelHandler(logging.Handler):
         return [msg for key in self.messages.keys()
                 for msg in self.messages[key]
                 if key != 'INFO']
+
+
+def get_traceback_output(tracebacks):
+    template = '''
+-------------------------------------------------------------------------------
+PATH: %s
+-------------------------------------------------------------------------------
+TRACEBACK:
+
+%s
+'''
+    return [template % (path, traceback) for
+        path, traceback in tracebacks]
