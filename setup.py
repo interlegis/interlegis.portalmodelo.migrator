@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '1.0a1'
+version = '1.0a2.dev0'
 description = 'Portal Modelo: Migração de versões antigas do portal para a versão 3.'
 long_description = (
     open('README.rst').read() + '\n' +
