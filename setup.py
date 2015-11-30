@@ -3,8 +3,8 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.1'
-description = 'Portal Modelo: Integração com sistemas do processo legislativo.'
+version = '1.0a1'
+description = 'Portal Modelo: Migração de versões antigas do portal para a versão 3.'
 long_description = (
     open('README.rst').read() + '\n' +
     open('CONTRIBUTORS.rst').read() + '\n' +
@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    keywords='interlegis plone portalmodelo transmogrifier',
+    keywords='interlegis plone portalmodelo transmogrifier migration',
     author='Programa Interlegis',
     author_email='ti@interlegis.leg.br',
     url='https://github.com/interlegis/interlegis.portalmodelo.migrator',
