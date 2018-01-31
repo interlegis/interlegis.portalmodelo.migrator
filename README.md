@@ -1,7 +1,7 @@
-#Portal Modelo: Componente para migração do Portal Modelo do 1 e 2 para o 3
+# Portal Modelo: Componente para migração do Portal Modelo do 1 e 2 para o 3
 
 
-##Introdução
+## Introdução
 
 Este pacote faz a migração do Portal Modelo versões 1 e 2 para a nova versão
 3.0.
