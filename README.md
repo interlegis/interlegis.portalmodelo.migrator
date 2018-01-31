@@ -2,7 +2,6 @@
 
 
 ##Introdução
-----------
 
 Este pacote faz a migração do Portal Modelo versões 1 e 2 para a nova versão
 3.0.
@@ -11,7 +10,7 @@ Ele é um pacote específico para o Portal Modelo e é pouco provável sua
 utilização fora deste contexto.
 
 ## Procedimento de Migração
-------------------------
+
 ### Migração do Portal Modelo 3 
 
 O Portal Modelo 2.0 foi criado utilizando a versão 2.5 do Plone, enquanto o Portal Modelo 3.0 é construído sobre a versão 4.3 do Plone. No período contido entre o lançamento do Portal Modelo 2 e do Portal Modelo 3 o Plone teve 8 versões e [http://plone.org/products/plone/releases/ 55 releases] e, para qualquer software, uma atualização com tantos passos intermediários torna-se complexa e deveria ser muito bem estudada.
